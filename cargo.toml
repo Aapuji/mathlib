@@ -1,0 +1,7 @@
+[package]
+name = "mathlib"
+version = "0.1.0"
+authors = ["SciDev","Aapuji"]
+edition = "2018"
+
+[dependencies]
