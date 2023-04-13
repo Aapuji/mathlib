@@ -4,31 +4,31 @@ use crate::var::Var;
 
 use super::{ArcExpr, Expr};
 
-impl std::ops::Add for ArcExpr {
+impl std::ops::Mul for ArcExpr {
     type Output = ArcExpr;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        ArcExpr(Arc::new(ExprAdd::new(vec![self.0, rhs.0])))
+    fn mul(self, rhs: Self) -> Self::Output {
+        ArcExpr(Arc::new(ExprMul::new(vec![self.0, rhs.0])))
     }
 }
 
 #[derive(Debug)]
-pub struct ExprAdd {
+pub struct ExprMul {
     children: Vec<Arc<dyn Expr>>,
 }
 
-impl ExprAdd {
+impl ExprMul {
     pub fn new(children: Vec<Arc<dyn Expr>>) -> Self {
         Self { children }
     }
 }
 
-impl Display for ExprAdd {
+impl Display for ExprMul {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "(")?;
         for (i,arcexpr) in self.children[..].into_iter().enumerate() {
             if i > 0 {
-                write!(f, " + ")?;
+                write!(f, " * ")?;
             }
             write!(f, "{}", arcexpr)?;
         }
@@ -38,7 +38,7 @@ impl Display for ExprAdd {
     }
 }
 
-impl Expr for ExprAdd {
+impl Expr for ExprMul {
     fn is_variant_on(&self, var: Arc<Var>) -> bool {
         self.children[..]
             .into_iter()

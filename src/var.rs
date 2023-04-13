@@ -19,7 +19,7 @@ impl Var {
 
 impl Display for Var {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "TODO")
+        write!(f, "VAR[{}]", self.name)
     }
 }
 
