@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use mathlib::expr::{Var, ArcExpr};
+use mathlib::{expr::ArcExpr, var::Var};
 
 fn main() {
     let a = Arc::new(Var::new("a"));
