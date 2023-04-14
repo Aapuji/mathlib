@@ -1,7 +1,7 @@
 use std::{sync::Arc, fmt::Display, collections::HashMap};
 use num_complex::Complex64;
 
-use crate::expr::{Expr, EvalError, EvalResult};
+use crate::expr::{Expr, EvalError, EvalResult, ArcExpr};
 
 /** Independent variable, unknown  */
 #[derive(PartialEq, Eq, Hash, Debug)]
@@ -14,6 +14,10 @@ impl Var {
         Self {
             name: name.to_string(),
         }
+    }
+    pub fn wrap(self) -> (Arc<Self>, ArcExpr) {
+        let new = Arc::new(self);
+        (new.clone(), ArcExpr(new))
     }
 }
 

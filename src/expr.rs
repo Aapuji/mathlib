@@ -33,3 +33,9 @@ impl Clone for ArcExpr {
     }
 }
 
+#[macro_export]
+macro_rules! arcify_expr {
+    ($expr: expr) => {{
+        ArcExpr(Arc::new($expr))
+    }};
+}
