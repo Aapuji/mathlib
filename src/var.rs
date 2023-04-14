@@ -1,7 +1,5 @@
 use std::{sync::Arc, fmt::Display};
-
 use crate::expr::Expr;
-
 
 /** Independent variable, unknown  */
 #[derive(PartialEq, Debug)]

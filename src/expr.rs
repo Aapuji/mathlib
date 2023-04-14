@@ -1,10 +1,8 @@
 use std::{sync::Arc, fmt::{Debug, Display}};
-
 use super::var::Var;
 
 pub mod add;
 pub mod mul;
-
 
 pub trait Expr : Debug + Display {
     fn is_variant_on(&self, var: Arc<Var>) -> bool;

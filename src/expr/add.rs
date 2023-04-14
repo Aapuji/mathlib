@@ -1,7 +1,5 @@
 use std::{fmt::Display, sync::Arc};
-
 use crate::var::Var;
-
 use super::{ArcExpr, Expr};
 
 impl std::ops::Add for ArcExpr {

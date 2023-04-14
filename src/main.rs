@@ -1,5 +1,4 @@
 use std::sync::Arc;
-
 use mathlib::{expr::ArcExpr, var::Var};
 
 fn main() {
@@ -15,5 +14,5 @@ fn main() {
 
     println!();
     println!("{}",s);
-    println!("\n\u{001b}[42m\u{001b}[30m :: hewwo world :: \u{001b}[0m\n");
+    println!("hello world");
 }
