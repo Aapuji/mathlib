@@ -7,7 +7,7 @@ authors = ["Aapuji", "SciDev"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
+num-complex = "0.4.3"
 
 [lib]
 name = "mathlib"       # The name of the target.

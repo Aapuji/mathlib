@@ -1,4 +1,6 @@
 use std::{fmt::Display, sync::Arc};
+use num_complex::Complex64;
+
 use crate::var::Var;
 use super::{ArcExpr, Expr};
 
@@ -43,5 +45,12 @@ impl Expr for ExprAdd {
             .map(|v| v.is_variant_on(var.clone()))
             .reduce(|a, b| a || b)
             .unwrap_or(false)
+    }
+    fn eval(&self, var_values: &std::collections::HashMap<&Var, num_complex::Complex64>) -> super::EvalResult {
+        let mut sum = Complex64::new(0.0, 0.0);
+        for term in &self.children {
+            sum += term.eval(var_values)?
+        }
+        Ok(sum)
     }
 }

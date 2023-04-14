@@ -1,8 +1,10 @@
-use std::{sync::Arc, fmt::Display};
-use crate::expr::Expr;
+use std::{sync::Arc, fmt::Display, collections::HashMap};
+use num_complex::Complex64;
+
+use crate::expr::{Expr, EvalError, EvalResult};
 
 /** Independent variable, unknown  */
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct Var {
     name: String,
 }
@@ -24,6 +26,11 @@ impl Display for Var {
 impl Expr for Var {
     fn is_variant_on(&self, var: Arc<Var>) -> bool {
         self == var.as_ref()
+    }
+    fn eval(&self, var_values: &HashMap<&Var, Complex64>) -> EvalResult {
+        var_values.get(&self)
+            .map(|v| Ok(v.clone()))
+            .unwrap_or(Err(EvalError::VarMissing { name: self.name.clone() }))
     }
 }
 
