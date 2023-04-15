@@ -1,9 +1,7 @@
 use std::{sync::Arc, collections::HashMap, fmt};
-
 use num_complex::Complex64;
 
 use crate::{num::Num, var::Var};
-
 use super::{Expr, EvalResult};
 
 #[derive(Debug)]
