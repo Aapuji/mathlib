@@ -1,5 +1,4 @@
 use std::fmt;
-
 use num_complex::Complex64;
 
 #[derive(Debug, Clone, Copy)]
