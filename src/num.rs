@@ -25,6 +25,8 @@ impl Num {
             Num::Pi => Complex64::new(std::f64::consts::PI, 0.0),
             Num::E => Complex64::new(std::f64::consts::E, 0.0),
             Num::I => Complex64::new(0.0, 1.0),
+            Num::Infinity => todo!(),
+            Num::Undefined => todo!()
         }
     }
 }
@@ -39,6 +41,8 @@ impl fmt::Display for Num {
             Num::Pi => write!(f, "\\pi"),
             Num::E => write!(f, "e"),
             Num::I => write!(f, "i"),
+            Num::Infinity => write!(f, "∞"),
+            Num::Undefined => write!(f, "UNDEF")
         }
     }
 }
