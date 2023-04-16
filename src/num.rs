@@ -25,8 +25,8 @@ impl Num {
             Num::Pi => Complex64::new(std::f64::consts::PI, 0.0),
             Num::E => Complex64::new(std::f64::consts::E, 0.0),
             Num::I => Complex64::new(0.0, 1.0),
-            Num::Infinity => todo!(),
-            Num::Undefined => todo!()
+            Num::Infinity => Complex64(0.0, 0.0), // TODO
+            Num::Undefined => Complex64(0.0, 0.0) // TODO
         }
     }
 }
