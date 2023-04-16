@@ -49,7 +49,7 @@ impl Expr for MulExpr {
         
     fn eval(&self, var_values: &HashMap<&Var, Complex64>) -> super::EvalResult {
         let mut product = Complex64::new(1.0, 0.0);
-        for term in &self.children {
+        for term in &self.operands {
             product *= term.eval(var_values)?
         }
             
