@@ -8,6 +8,8 @@ pub enum Num {
     Pi,
     E,
     I,
+    Infinity,
+    Undefined
 }
 
 impl Num {
