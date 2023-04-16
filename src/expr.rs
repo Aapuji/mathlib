@@ -16,10 +16,11 @@ pub trait Expr : Debug + Display {
 pub enum EvalError {
     VarMissing { name: String },
 }
+
 impl fmt::Display for EvalError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::VarMissing { name } => write!(f,"Missing variable '{name}' in eval."),
+            Self::VarMissing { name } => write!(f, "Missing variable '{name}' in eval."),
         }
     }
 }
@@ -27,6 +28,7 @@ impl fmt::Display for EvalError {
 pub type EvalResult = Result<Complex64, EvalError>;
 
 pub struct ArcExpr(pub Arc<dyn Expr>);
+
 impl Clone for ArcExpr {
     fn clone(&self) -> Self {
         ArcExpr(self.0.clone())
