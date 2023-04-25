@@ -17,7 +17,7 @@ pub enum EvalError {
     VarMissing { name: String },
 }
 
-impl fmt::Display for EvalError {
+impl Display for EvalError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::VarMissing { name } => write!(f, "Missing variable '{name}' in eval."),
@@ -32,6 +32,12 @@ pub struct ArcExpr(pub Arc<dyn Expr>);
 impl Clone for ArcExpr {
     fn clone(&self) -> Self {
         ArcExpr(self.0.clone())
+    }
+}
+
+impl From<ArcExpr> for Arc<dyn Expr> {
+    fn from(value: ArcExpr) -> Self {
+        value.0
     }
 }
 
