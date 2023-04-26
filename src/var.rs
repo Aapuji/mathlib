@@ -19,6 +19,9 @@ impl Var {
         let new = Arc::new(self);
         (new.clone(), ArcExpr(new))
     }
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    } 
 }
 
 impl Display for Var {

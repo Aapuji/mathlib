@@ -1,7 +1,9 @@
-use std::{sync::Arc, fmt::{Display, write}, collections::HashMap};
+use std::{sync::Arc, fmt::Display, collections::HashMap};
 use num_complex::Complex64;
 
-use crate::{expr::{Expr, ArcExpr}, var::Var};
+use crate::{expr::Expr, var::Var};
+
+// ASSIGNED TO OM: trait FnExpr
 
 #[derive(Debug)]
 pub struct Function<E>
@@ -52,7 +54,7 @@ where
     E: Expr
 {
     fn eval(&self, var_values: &HashMap<&Var, Complex64>) -> crate::expr::EvalResult {
-        self.expr.eval(var_values)
+        todo!()
     }
 
     fn is_variant_on(&self, var: Arc<Var>) -> bool {

@@ -27,6 +27,7 @@ impl Display for EvalError {
 
 pub type EvalResult = Result<Complex64, EvalError>;
 
+/** Holds a reference to some mathematical expression */
 pub struct ArcExpr(pub Arc<dyn Expr>);
 
 impl Clone for ArcExpr {

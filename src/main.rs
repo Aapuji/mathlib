@@ -1,8 +1,8 @@
 use std::sync::Arc;
+use mathlib::enum_expr_proposal::EExpr;
 use mathlib::expr::{Expr, ArcExpr, constant::ConstExpr};
 use mathlib::var::Var;
 use mathlib::num::Num;
-use mathlib::function::Function;
 use mathlib::arcify_expr;
 
 fn main() {
@@ -16,6 +16,11 @@ fn main() {
     let s_r = a.clone() + two.clone() + b.clone() * a.clone() * (two.clone() + e.clone());
 
     let s = s_r.0;
+
+    let ea = EExpr::Var(a_var.clone());
+    let eb = EExpr::Var(b_var.clone());
+
+    let esum = (ea + eb) * EExpr::Const(Num::I) * EExpr::Const(Num::Pi);
 
     // let x = Var::new("x");
     // let f = Function::new(
