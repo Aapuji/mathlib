@@ -68,7 +68,11 @@ impl fmt::Display for Num {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Num::Rational { num, den } => {
-                write!(f, "{}/{}", num, den)
+                if *den == 1 {
+                    write!(f, "{}", num)
+                } else { 
+                    write!(f, "{}/{}", num, den)
+                }
             }
             Num::Radical { radicand, index } => write!(f, "\\sqrt[{index}]{{{radicand}}}"),
             Num::Pi => write!(f, "\\pi"),
