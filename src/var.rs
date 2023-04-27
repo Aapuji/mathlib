@@ -1,7 +1,5 @@
-use std::{sync::Arc, fmt::Display, collections::HashMap};
-use num_complex::Complex64;
+use std::{sync::Arc, fmt::Display};
 
-use crate::expr::{Expr, EvalError, EvalResult, ArcExpr};
 
 /** Independent variable, unknown  */
 #[derive(PartialEq, Eq, Hash, Debug)]
@@ -10,14 +8,13 @@ pub struct Var {
 }
 
 impl Var {
-    pub fn new(name: &str) -> Self {
+    pub fn new(name: &str) -> Arc<Self> {
+        Arc::new(Self::new_owned(name))
+    }
+    pub fn new_owned(name: &str) -> Self {
         Self {
             name: name.to_string(),
         }
-    }
-    pub fn wrap(self) -> (Arc<Self>, ArcExpr) {
-        let new = Arc::new(self);
-        (new.clone(), ArcExpr(new))
     }
     pub fn get_name(&self) -> String {
         self.name.clone()
@@ -27,17 +24,6 @@ impl Var {
 impl Display for Var {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "VAR[{}]", self.name)
-    }
-}
-
-impl Expr for Var {
-    fn is_variant_on(&self, var: Arc<Var>) -> bool {
-        self == var.as_ref()
-    }
-    fn eval(&self, var_values: &HashMap<&Var, Complex64>) -> EvalResult {
-        var_values.get(&self)
-            .map(|v| Ok(v.clone()))
-            .unwrap_or(Err(EvalError::VarMissing { name: self.name.clone() }))
     }
 }
 

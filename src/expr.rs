@@ -1,50 +1,109 @@
-use std::{sync::Arc, fmt::{Debug, Display, self}, collections::HashMap};
+use std::{sync::Arc, collections::HashMap, ops::{Add, Mul}, fmt::{Display, Formatter, self}};
+
 use num_complex::Complex64;
 
-use super::var::Var;
+use crate::{var::Var, num::Num, function::FuncDef};
 
-pub mod add;
-pub mod mul;
-pub mod constant;
-
-pub trait Expr : Debug + Display {
-    fn is_variant_on(&self, var: Arc<Var>) -> bool;
-    fn eval(&self, var_values: &HashMap<&Var, Complex64>) -> EvalResult;
-}
+mod expr_fmt;
 
 #[derive(Debug)]
 pub enum EvalError {
     VarMissing { name: String },
+    FnArgCountMismatch { },
 }
 
 impl Display for EvalError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::VarMissing { name } => write!(f, "Missing variable '{name}' in eval."),
+            Self::FnArgCountMismatch {  } => write!(f, "Incorrect number of function arguments.")
+        }
+    }
+}
+pub type EvalResult = Result<Complex64, EvalError>;
+
+
+#[derive(Debug, Clone)]
+pub enum Expr {
+    Sum(Vec<Expr>),
+    Product(Vec<Expr>),
+    Var(Arc<Var>),
+    Const(Num),
+    Func(Arc<dyn FuncDef>,Vec<Expr>),
+}
+
+impl Expr {
+    pub fn eval(&self, var_values: &HashMap<&Var, Complex64>) -> EvalResult {
+        match self {
+            Self::Sum(terms) => {
+                let mut sum = Complex64::new(0.0, 0.0);
+                for term in terms {
+                    sum += term.eval(var_values)?
+                }
+                Ok(sum)
+            }
+            Self::Product(terms) => {
+                let mut product = Complex64::new(1.0, 0.0);
+                for term in terms {
+                    product *= term.eval(var_values)?
+                }
+                Ok(product)
+            }
+            Self::Var(var) => {
+                Ok(var_values.get(var.as_ref())
+                    .ok_or(EvalError::VarMissing { name: var.get_name() })?
+                    .clone()
+                )
+            }
+            Self::Const(num) => {
+                Ok(num.eval_float())
+            }
+            Self::Func(def, args) => {
+                let mut evaluated_args = Vec::with_capacity(args.len());
+                for arg in args {
+                    evaluated_args.push(arg.eval(var_values)?);
+                }
+                def.eval(evaluated_args, var_values)
+            }
+        }
+    }
+    pub fn is_variant_on(&self, var: &Var) -> bool {
+        match self {
+            Self::Sum(terms) | Self::Product(terms) => {
+                let mut is_variant = false;
+                for term in terms {
+                    is_variant |= term.is_variant_on(var)
+                }
+                is_variant
+            }
+            Self::Var(checking_var) => {
+                var == checking_var.as_ref()
+            }
+            Self::Const( .. ) => {
+                false
+            }
+            Self::Func(def, args) => {
+                let mut is_variant = false;
+                for arg in args {
+                    is_variant |= arg.is_variant_on(var)
+                }
+                is_variant |= def.is_variant_on_global(var);
+                is_variant
+            }
         }
     }
 }
 
-pub type EvalResult = Result<Complex64, EvalError>;
-
-/** Holds a reference to some mathematical expression */
-pub struct ArcExpr(pub Arc<dyn Expr>);
-
-impl Clone for ArcExpr {
-    fn clone(&self) -> Self {
-        ArcExpr(self.0.clone())
+impl Add for Expr {
+    type Output = Expr;
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::Sum(vec![self, rhs])
     }
 }
 
-impl From<ArcExpr> for Arc<dyn Expr> {
-    fn from(value: ArcExpr) -> Self {
-        value.0
+impl Mul for Expr {
+    type Output = Expr;
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self::Product(vec![self, rhs])
     }
-}
-
-#[macro_export]
-macro_rules! arcify_expr {
-    ($expr: expr) => {{
-        ArcExpr(Arc::new($expr))
-    }};
 }
