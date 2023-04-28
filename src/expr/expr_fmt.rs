@@ -21,7 +21,7 @@ impl fmt::Display for Expr {
             },
             Expr::Var(var) => write!(f, "VAR[{}]", var.get_name()),
             Expr::Const(num) => write!(f, "CONST[{}]", num),
-            Expr::Func(_, _) => todo!(),
+            Expr::Function(_, _) => todo!(),
         }
     }
 }

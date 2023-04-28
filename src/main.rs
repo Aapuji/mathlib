@@ -34,4 +34,7 @@ fn main() {
     println!("sum: {}", s);
     println!("sum eval: {}", s.eval(&v).unwrap());
     println!("infinity: {}", inf);
+
+    println!("\n\n\n");
+    println!("");
 }
