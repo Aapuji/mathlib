@@ -1,5 +1,5 @@
 use std::{collections::HashMap, fmt::Debug};
-use num_complex::{Complex64, ComplexFloat};
+use num_complex::Complex64;
 
 use crate::{expr::{EvalResult, EvalError}, var::Var};
 
@@ -36,8 +36,8 @@ impl FuncDef for Function {
             return Err(EvalError::FnArgCountMismatch { });
         }
         Ok(match self {
-            Function::Abs => Complex64::from(args[0].abs()),
-            Function::Sgn => args[0] / args[0].abs(),
+            Function::Abs => Complex64::from(args[0].norm()),
+            Function::Sgn => args[0] / args[0].norm(),
             Function::Exp => args[0].exp(),
             Function::Ln => args[0].ln(),
             Function::Sin => args[0].sin(),
