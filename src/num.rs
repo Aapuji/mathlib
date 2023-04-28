@@ -10,6 +10,8 @@ pub enum Num {
     Pi,
     E,
     I,
+    Zero,
+    One,
     Infinity,
     Undefined
 }
@@ -23,14 +25,17 @@ impl Num {
             ),
             Num::Radical { radicand, index } => {
                 Complex64::new((*radicand as f64).powf(1.0 / (*index as f64)), 0.0)
-            }
+            },
             Num::Pi => Complex64::new(std::f64::consts::PI, 0.0),
             Num::E => Complex64::new(std::f64::consts::E, 0.0),
             Num::I => Complex64::new(0.0, 1.0),
+            Num::Zero => (Num::Rational { num: 0, den: 1 }).eval_float(),
+            Num::One => (Num::Rational { num: 1, den: 1 }).eval_float(),
             Num::Infinity => Complex64::new(f64::INFINITY, 0.0),
             Num::Undefined => todo!("Num::Undefined is, well, undefined (unimplemented)")
         }
     }
+
     pub fn reduce(&self) -> Num {
         match self {
             Num::Rational { num, den } => {
@@ -39,8 +44,12 @@ impl Num {
             }
             _ => *self
         }
+        
+        // Can't we just do self.eval_float() == Complex64(0, 0) ?
     }
-    pub fn zero() -> Num { Num::Rational { num: 0, den: 1 } }
+
+    // pub fn zero() -> Num { Num::Rational { num: 0, den: 1 } }
+
     pub fn is_zero(&self) -> bool {
         match self {
             Num::Rational { num, den } => *num == 0 && *den != 0,
@@ -48,14 +57,19 @@ impl Num {
             _ => false,
         }
     }
-    pub fn one() -> Num { Num::Rational { num: 1, den: 1 } }
+
+    // pub fn one() -> Num { Num::Rational { num: 1, den: 1 } }
+
     pub fn is_one(&self) -> bool {
         match self {
             Num::Rational { num, den } => *num == 1 && *den != 0,
             Num::Radical { radicand, index } => *radicand == 1 && *index != 0,
             _ => false,
         }
+
+        // Can't we just do self.eval_float() == Complex64(1, 0) ?
     }
+
     pub fn is_undefined(&self) -> bool {
         match self {
             Num::Undefined => true,
@@ -73,11 +87,13 @@ impl fmt::Display for Num {
                 } else { 
                     write!(f, "{}/{}", num, den)
                 }
-            }
-            Num::Radical { radicand, index } => write!(f, "\\sqrt[{index}]{{{radicand}}}"),
+            },
+            Num::Radical { radicand, index } => write!(f, "\\sqrt[{}]{{{}}}", index, radicand),
             Num::Pi => write!(f, "\\pi"),
             Num::E => write!(f, "e"),
             Num::I => write!(f, "i"),
+            Num::Zero => write!(f, "0"),
+            Num::One => write!(f, "1"),
             Num::Infinity => write!(f, "∞"),
             Num::Undefined => write!(f, "UNDEF")
         }

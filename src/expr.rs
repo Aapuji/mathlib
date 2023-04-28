@@ -1,10 +1,7 @@
-use std::{
-    collections::HashMap,
-    fmt::{self, Display, Formatter},
-    ops::{Add, Mul, Sub},
-    sync::Arc,
-};
-
+use std::collections::HashMap;
+use std::fmt::{self, Display, Formatter};
+use std::ops::{Add, Sub, Mul};
+use std::sync::Arc;
 use num_complex::Complex64;
 
 use crate::{function::FuncDef, num::Num, var::Var};
@@ -112,35 +109,74 @@ impl Expr {
             }
         }
     }
+
     pub fn derivative(&self, var: &Var) -> Expr {
         match self {
             Expr::Sum(terms) => {
+                let mut const_operands = true;
+                for term in terms.iter() {
+                    if let Expr::Const(_) = term {
+                        ()
+                    } else {
+                        const_operands = false;
+                        break;
+                    }
+                }
+                if const_operands {
+                    return Expr::Const(Num::Zero);
+                }
+
                 // (a + b + c)' = a' + b' + c'
-                Expr::Sum(terms.into_iter().map(|v| v.derivative(var)).collect())
+                Expr::Sum(
+                    terms
+                        .into_iter()
+                        .map(|v| v.derivative(var))
+                        .collect()
+                )
             }
+
             Expr::Product(terms) => {
+                let mut const_operands = true;
+                for term in terms.iter() {
+                    if let Expr::Const(_) = term {
+                        ()
+                    } else {
+                        const_operands = false;
+                        break;
+                    }
+                }
+                if const_operands {
+                    return Expr::Const(Num::Zero);
+                }
+
                 // (abc)' = a'bc + ab'c + abc'
                 let mut new_terms = vec![terms.clone(); terms.len()];
+
                 for i in 0..terms.len() {
                     new_terms[i][i] = new_terms[i][i].derivative(var);
                 }
+
                 Expr::Sum(new_terms.into_iter().map(|v| Expr::Product(v)).collect())
             }
+
             Expr::Var(expr_var) => {
-                // d/da a = 1; d/da b = 0 /* assuming a and b are both independent vars */;
+                // dx/dx = 1, dy/dx = 0, assuming x and y are both independent vars
                 if expr_var.as_ref() == var {
-                    Expr::Const(Num::Rational { num: 1, den: 1 })
+                    Expr::Const(Num::One)
                 } else {
-                    Expr::Const(Num::Rational { num: 0, den: 1 })
+                    Expr::Const(Num::Zero)
                 }
             }
+            
             Expr::Const(_) => {
                 // (c)' = 0
-                Expr::Const(Num::Rational { num: 0, den: 1 })
+                Expr::Const(Num::Zero)
             }
+
             Expr::Function(_, _) => todo!(),
         }
     }
+
     /** Handle simple simplification identities involing single terms. */
     pub fn simplify_trivial(&self) -> Expr {
         match self {
@@ -159,7 +195,7 @@ impl Expr {
                     .collect();
 
                 if terms_out.len() == 0 {
-                    Expr::Const(Num::zero())
+                    Expr::Const(Num::Zero)
                 } else if terms_out.len() == 1 {
                     terms_out[0].clone()
                 } else {
@@ -186,11 +222,11 @@ impl Expr {
                 }).count() > 0;
 
                 if any_zeros {
-                    Expr::Const(Num::zero())
+                    Expr::Const(Num::Zero)
                 } else if terms_out.len() == 1 {
                     terms_out[0].clone()
                 } else if terms_out.len() == 0 {
-                    Expr::Const(Num::one())
+                    Expr::Const(Num::Zero)
                 } else {
                     Expr::Product(terms_out)
                 }
