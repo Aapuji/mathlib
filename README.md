@@ -1,2 +1,2 @@
 # Math Lib
-A math-based library
+A math-based library written in rust.
