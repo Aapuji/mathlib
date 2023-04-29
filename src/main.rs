@@ -11,7 +11,7 @@ fn main() {
 
     let x = Expr::Var(x_var.clone());
     let y = Expr::Var(y_var.clone());
-    let two = Expr::Const(Num::int(2));
+    let two = Expr::Const(Num::from(2));
     let e = Expr::Const(Num::E);
     let inf = Expr::Const(Num::Infinity);
 
@@ -37,15 +37,15 @@ fn main() {
     //     AddExpr::new(vec![Arc::new(1), Arc::new(2)])
     // );
 
-    let mut v = HashMap::new();
-    v.insert(x_var.as_ref(), Complex64::new(1.0, 2.0));
-    v.insert(y_var.as_ref(), Complex64::new(-1.0, 0.0));
+    let mut ctx = HashMap::new();
+    ctx.insert(x_var.as_ref(), Complex64::new(1.0, 2.0));
+    ctx.insert(y_var.as_ref(), Complex64::new(-1.0, 0.0));
 
     println!();
-    println!("{x} = {}", v.get(x_var.as_ref()).unwrap());
-    println!("{y} = {}", v.get(y_var.as_ref()).unwrap());
+    println!("{x} = {}", ctx.get(x_var.as_ref()).unwrap());
+    println!("{y} = {}", ctx.get(y_var.as_ref()).unwrap());
     println!();
-    println!("f = {} = {}", f.simplify_trivial(), f.eval(&v).unwrap());
+    println!("f = {} = {}", f.simplify_trivial(), f.eval(&ctx).unwrap());
     println!("k = {} = {}", g, g.simplify_trivial());
     println!("z = {}, dz/dx = {}", z, dz_dx);
     println!(

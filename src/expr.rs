@@ -104,6 +104,7 @@ impl Expr {
         }
     }
 
+    /// Takes partial derivative of `&self`, with respect to `var`. 
     pub fn derivative(&self, var: &Var) -> Expr {
         match self {
             Expr::Sum(terms) => {
@@ -325,7 +326,7 @@ impl Add for Expr {
     type Output = Expr;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Self::Sum(vec![self, rhs])
+        Expr::Sum(vec![self.clone(), rhs.clone()])
     }
 }
 
@@ -335,7 +336,7 @@ impl Sub for Expr {
     fn sub(self, rhs: Self) -> Self::Output {
         Self::Sum(vec![
             self,
-            Self::Product(vec![Self::Const(Num::int(-1)), rhs]),
+            Self::Product(vec![Self::Const(Num::from(-1)), rhs]),
         ])
     }
 }

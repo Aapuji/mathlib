@@ -1,10 +1,8 @@
 use num_complex::Complex64;
 use std::{collections::HashMap, fmt::Debug};
 
-use crate::{
-    expr::{EvalError, EvalResult},
-    var::Var,
-};
+use crate::expr::{EvalError, EvalResult};
+use crate::var::Var;
 
 pub trait FuncDef: Debug {
     fn eval(&self, args: Vec<Complex64>, global_vars: &HashMap<&Var, Complex64>) -> EvalResult;
@@ -40,6 +38,7 @@ impl FuncDef for Function {
         {
             return Err(EvalError::FnArgCountMismatch {});
         }
+        
         Ok(match self {
             Function::Abs => Complex64::from(args[0].norm()),
             Function::Sgn => args[0] / args[0].norm(),

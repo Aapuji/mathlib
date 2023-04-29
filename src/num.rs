@@ -61,20 +61,10 @@ impl Num {
         // Can't we just do self.eval_float() == Complex64(0, 0) ?
     }
 
-    pub fn int(v: i32) -> Num {
-        match v {
-            0 => Num::Zero,
-            1 => Num::One,
-            _ => Num::Rational {
-                num: NonZeroI32::new(v).unwrap(),
-                den: NonZeroU32::new(1).unwrap(),
-            },
-        }
-    }
     pub fn rational(num: i32, den: u32) -> Num {
         match (num, den) {
             (_, 0) => Num::Undefined,
-            (_, 1) => Num::int(num),
+            (_, 1) => Num::from(num),
             (0, _) => Num::Zero,
             (1, _) => Num::One,
             _ => Num::Rational {
@@ -86,7 +76,7 @@ impl Num {
     pub fn radical(radicand: u32, index: u32) -> Num {
         match (radicand, index) {
             (_, 0) => Num::Undefined,
-            (_, 1) => Num::int(radicand as i32),
+            (_, 1) => Num::from(radicand as i32),
             (0, _) => Num::Zero,
             (1, _) => Num::One,
             _ => Num::Radical {
@@ -166,6 +156,19 @@ impl PartialEq for Num {
                 todo!()
             }
             _ => false,
+        }
+    }
+}
+
+impl From<i32> for Num {
+    fn from(value: i32) -> Self {
+        match value {
+            0 => Num::Zero,
+            1 => Num::One,
+            _ => Num::Rational {
+                num: NonZeroI32::new(value).unwrap(),
+                den: NonZeroU32::new(1).unwrap(),
+            },
         }
     }
 }
