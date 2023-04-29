@@ -1,8 +1,8 @@
+use num_complex::Complex64;
 use std::collections::HashMap;
 use std::fmt::{self, Display, Formatter};
-use std::ops::{Add, Sub, Mul};
+use std::ops::{Add, Mul, Sub};
 use std::sync::Arc;
-use num_complex::Complex64;
 
 use crate::{function::FuncDef, num::Num, var::Var};
 
@@ -54,16 +54,14 @@ impl Expr {
                 Ok(product)
             }
 
-            Self::Var(var) => {
-                Ok(var_values.get(var.as_ref())
-                    .ok_or(EvalError::VarMissing { name: var.get_name() })?
-                    .clone()
-                )
-            }
+            Self::Var(var) => Ok(var_values
+                .get(var.as_ref())
+                .ok_or(EvalError::VarMissing {
+                    name: var.get_name(),
+                })?
+                .clone()),
 
-            Self::Const(num) => {
-                Ok(num.eval_float())
-            }
+            Self::Const(num) => Ok(num.eval_float()),
 
             Self::Function(def, args) => {
                 let mut evaluated_args = Vec::with_capacity(args.len());
@@ -81,7 +79,7 @@ impl Expr {
         match self {
             Self::Sum(terms) | Self::Product(terms) => {
                 let mut is_variant = false;
-                
+
                 for term in terms {
                     is_variant |= term.is_variant_on(var)
                 }
@@ -89,22 +87,18 @@ impl Expr {
                 is_variant
             }
 
-            Self::Var(checking_var) => {
-                var == checking_var.as_ref()
-            }
+            Self::Var(checking_var) => var == checking_var.as_ref(),
 
-            Self::Const( .. ) => {
-                false
-            }
+            Self::Const(..) => false,
 
             Self::Function(def, args) => {
                 let mut is_variant = false;
-                
+
                 for arg in args {
                     is_variant |= arg.is_variant_on(var)
                 }
                 is_variant |= def.is_variant_on_global(var);
-                
+
                 is_variant
             }
         }
@@ -127,12 +121,7 @@ impl Expr {
                 }
 
                 // (a + b + c)' = a' + b' + c'
-                Expr::Sum(
-                    terms
-                        .into_iter()
-                        .map(|v| v.derivative(var))
-                        .collect()
-                )
+                Expr::Sum(terms.into_iter().map(|v| v.derivative(var)).collect())
             }
 
             Expr::Product(terms) => {
@@ -156,7 +145,12 @@ impl Expr {
                     new_terms[i][i] = new_terms[i][i].derivative(var);
                 }
 
-                Expr::Sum(new_terms.into_iter().map(|v| Expr::Product(v)).collect())
+                Expr::Sum(
+                    new_terms
+                        .into_iter()
+                        .map(|v| Expr::Product(v).simplify_trivial_single_layer())
+                        .collect(),
+                )
             }
 
             Expr::Var(expr_var) => {
@@ -167,7 +161,7 @@ impl Expr {
                     Expr::Const(Num::Zero)
                 }
             }
-            
+
             Expr::Const(_) => {
                 // (c)' = 0
                 Expr::Const(Num::Zero)
@@ -175,15 +169,35 @@ impl Expr {
 
             Expr::Function(_, _) => todo!(),
         }
+        .simplify_trivial_single_layer()
     }
 
     /** Handle simple simplification identities involing single terms. */
     pub fn simplify_trivial(&self) -> Expr {
         match self {
             Expr::Sum(terms) => {
-                let terms_out: Vec<Expr> = terms
+                Expr::Sum(terms.into_iter().map(|v| v.simplify_trivial()).collect())
+            }
+            Expr::Product(terms) => {
+                Expr::Product(terms.into_iter().map(|v| v.simplify_trivial()).collect())
+            }
+            Expr::Function(def, arg_terms) => Expr::Function(
+                def.clone(),
+                arg_terms
                     .into_iter()
                     .map(|v| v.simplify_trivial())
+                    .collect(),
+            ),
+            _ => self.clone(),
+        }
+        .simplify_trivial_single_layer()
+    }
+    pub fn simplify_trivial_single_layer(&self) -> Expr {
+        match self {
+            Expr::Sum(terms) => {
+                let terms_out: Vec<Expr> = terms
+                    .clone()
+                    .into_iter()
                     .flat_map(|v| match v {
                         Expr::Sum(subterms) => subterms,
                         _ => vec![v],
@@ -204,8 +218,8 @@ impl Expr {
             }
             Expr::Product(terms) => {
                 let terms_out: Vec<Expr> = terms
+                    .clone()
                     .into_iter()
-                    .map(|v| v.simplify_trivial())
                     .flat_map(|v| match v {
                         Expr::Product(subterms) => subterms,
                         _ => vec![v],
@@ -216,10 +230,14 @@ impl Expr {
                     })
                     .collect();
 
-                let any_zeros = terms.into_iter().filter(|v| match v {
-                    Expr::Const(n) => n.is_zero(),
-                    _ => false,
-                }).count() > 0;
+                let any_zeros = terms
+                    .into_iter()
+                    .filter(|v| match v {
+                        Expr::Const(n) => n.is_zero(),
+                        _ => false,
+                    })
+                    .count()
+                    > 0;
 
                 if any_zeros {
                     Expr::Const(Num::Zero)
@@ -230,14 +248,74 @@ impl Expr {
                 } else {
                     Expr::Product(terms_out)
                 }
-            },
-            Expr::Var(expr_var) => {
-                Expr::Var(expr_var.clone())
             }
+            Expr::Var(expr_var) => Expr::Var(expr_var.clone()),
             Expr::Const(num) => {
                 // (c)' = 0
                 Expr::Const(num.reduce())
             }
+            Expr::Function(def, args) => Expr::Function(def.clone(), args.clone()),
+        }
+    }
+
+    pub fn exact_match(&self, other: &Expr) -> bool {
+        match self {
+            Expr::Sum(terms_self) => match other {
+                Expr::Sum(terms_other) => {
+                    if terms_self.len() != terms_other.len() {
+                        return false;
+                    }
+                    let mut terms_to_match = terms_other.clone();
+                    for term in terms_self {
+                        let mut found = None;
+                        for i in 0..terms_to_match.len() {
+                            if Expr::exact_match(term, &terms_to_match[i]) {
+                                found = Some(i);
+                                break;
+                            }
+                        }
+                        if let Some(i) = found {
+                            terms_to_match.drain(i..i + 1);
+                        } else {
+                            return false;
+                        }
+                    }
+                    true
+                }
+                _ => false,
+            },
+            Expr::Product(terms_self) => match other {
+                Expr::Product(terms_other) => {
+                    if terms_self.len() != terms_other.len() {
+                        return false;
+                    }
+                    let mut terms_to_match = terms_other.clone();
+                    for term in terms_self {
+                        let mut found = None;
+                        for i in 0..terms_to_match.len() {
+                            if Expr::exact_match(term, &terms_to_match[i]) {
+                                found = Some(i);
+                                break;
+                            }
+                        }
+                        if let Some(i) = found {
+                            terms_to_match.drain(i..i + 1);
+                        } else {
+                            return false;
+                        }
+                    }
+                    true
+                }
+                _ => false,
+            },
+            Expr::Var(var_self) => match other {
+                Expr::Var(var_other) => var_self == var_other,
+                _ => false,
+            },
+            Expr::Const(num_self) => match other {
+                Expr::Const(num_other) => num_self == num_other,
+                _ => false,
+            },
             Expr::Function(_, _) => todo!(),
         }
     }
@@ -256,11 +334,8 @@ impl Sub for Expr {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Self::Sum(vec![
-            self, 
-            Self::Product(vec![
-                Self::Const(Num::Rational { num: -1, den: 1 }),
-                rhs
-            ])
+            self,
+            Self::Product(vec![Self::Const(Num::Rational { num: -1, den: 1 }), rhs]),
         ])
     }
 }
@@ -281,14 +356,14 @@ impl fmt::Display for Expr {
                     k.push(format!("{}", term));
                 }
                 write!(f, "({})", k.join(" + "))
-            },
+            }
             Expr::Product(terms) => {
                 let mut k: Vec<String> = vec![];
                 for term in terms {
                     k.push(format!("{}", term));
                 }
                 write!(f, "({})", k.join(" * "))
-            },
+            }
             Expr::Var(var) => write!(f, "\u{001b}[95m{}", var.get_name()),
             Expr::Const(num) => write!(f, "\u{001b}[94m{}", num),
             Expr::Function(_, _) => todo!(),

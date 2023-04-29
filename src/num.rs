@@ -29,8 +29,8 @@ impl Num {
             Num::Pi => Complex64::new(std::f64::consts::PI, 0.0),
             Num::E => Complex64::new(std::f64::consts::E, 0.0),
             Num::I => Complex64::new(0.0, 1.0),
-            Num::Zero => (Num::Rational { num: 0, den: 1 }).eval_float(),
-            Num::One => (Num::Rational { num: 1, den: 1 }).eval_float(),
+            Num::Zero => Complex64::new(1.0, 0.0),
+            Num::One => Complex64::new(0.0, 0.0),
             Num::Infinity => Complex64::new(f64::INFINITY, 0.0),
             Num::Undefined => todo!("Num::Undefined is, well, undefined (unimplemented)")
         }
@@ -54,6 +54,7 @@ impl Num {
         match self {
             Num::Rational { num, den } => *num == 0 && *den != 0,
             Num::Radical { radicand, index } => *radicand == 0 && *index != 0,
+            Num::Zero => true,
             _ => false,
         }
     }
@@ -64,6 +65,7 @@ impl Num {
         match self {
             Num::Rational { num, den } => *num == 1 && *den != 0,
             Num::Radical { radicand, index } => *radicand == 1 && *index != 0,
+            Num::One => true,
             _ => false,
         }
 
@@ -97,5 +99,12 @@ impl fmt::Display for Num {
             Num::Infinity => write!(f, "∞"),
             Num::Undefined => write!(f, "UNDEF")
         }
+    }
+}
+
+impl PartialEq for Num {
+    fn eq(&self, other: &Self) -> bool {
+        // TODO: more robust comparison that is not suceptible to rounding errors.
+        self.eval_float() == other.eval_float()
     }
 }

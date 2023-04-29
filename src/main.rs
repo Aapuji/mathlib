@@ -21,9 +21,9 @@ fn main() {
     // 0*x + 1*y + 0
     let g = x.clone() * Expr::Const(Num::Zero) + y.clone() * Expr::Const(Num::One) + Expr::Const(Num::Zero);
 
-    // x*i + e + x*x + y
-    let z = x.clone() * Expr::Const(Num::I).clone() + e.clone() + x.clone() * x.clone() + y.clone();
-    let dz_da = z.derivative(x_var.as_ref()).simplify_trivial();
+    // x*i + e + x*x*e + y
+    let z = x.clone() * Expr::Const(Num::I).clone() + e.clone() + x.clone() * x.clone() * Expr::Const(Num::E) + y.clone();
+    let dz_da = z.simplify_trivial().derivative(x_var.as_ref());//.simplify_trivial();
 
     // let x = Var::new("x");
     // let f = Function::new(

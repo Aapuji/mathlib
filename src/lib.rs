@@ -4,3 +4,5 @@ pub mod num;
 pub mod function;
 
 mod algo;
+
+mod testing;
