@@ -6,12 +6,12 @@ use mathlib::num::Num;
 use num_complex::Complex64;
 
 fn main() {
-    let x_var = Var::new("a");
-    let y_var = Var::new("b");
+    let x_var = Var::new("x");
+    let y_var = Var::new("y");
 
     let x = Expr::Var(x_var.clone());
     let y = Expr::Var(y_var.clone());
-    let two = Expr::Const(Num::Rational { num: 2, den: 1 });
+    let two = Expr::Const(Num::int(2));
     let e = Expr::Const(Num::E);
     let inf = Expr::Const(Num::Infinity);
 
@@ -23,7 +23,7 @@ fn main() {
 
     // x*i + e + x*x*e + y
     let z = x.clone() * Expr::Const(Num::I).clone() + e.clone() + x.clone() * x.clone() * Expr::Const(Num::E) + y.clone();
-    let dz_da = z.simplify_trivial().derivative(x_var.as_ref());//.simplify_trivial();
+    let dz_dx = z.simplify_trivial().derivative(x_var.as_ref());//.simplify_trivial();
 
     // let x = Var::new("x");
     // let f = Function::new(
@@ -37,11 +37,14 @@ fn main() {
     v.insert(y_var.as_ref(), Complex64::new(-1.0, 0.0));
 
     println!();
-    println!("k: {}, ks: {}", g, g.simplify_trivial());
-    println!("a: {}, b: {}", x_var, y_var);
-    println!("z: {}, dz_da: {}", z, dz_da);
-    println!("sum: {}", f.simplify_trivial());
-    println!("sum eval: {}", f.eval(&v).unwrap());
+    println!("{x} = {}\n{y} = {}", v.get(x_var.as_ref()).unwrap(), v.get(y_var.as_ref()).unwrap());
+    println!();
+    println!("f = {} = {}", f.simplify_trivial(), f.eval(&v).unwrap());
+    println!("k = {} = {}", g, g.simplify_trivial());
+    println!("z = {}, dz/dx = {}", z, dz_dx);
+    println!("g = {}, dg/dx = {}", g.simplify_trivial(), g.derivative(x_var.as_ref()));
+    println!();
+    println!("undefined: {}", Expr::Const(Num::rational(1, 0)));
     println!("infinity: {}", inf);
-    println!("\n\ndg/dx: {}", g.derivative(x_var.as_ref()));
+    println!();
 }

@@ -329,13 +329,14 @@ impl Add for Expr {
     }
 }
 
+
 impl Sub for Expr {
     type Output = Expr;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Self::Sum(vec![
             self,
-            Self::Product(vec![Self::Const(Num::Rational { num: -1, den: 1 }), rhs]),
+            Self::Product(vec![Self::Const(Num::int(-1)), rhs]),
         ])
     }
 }
