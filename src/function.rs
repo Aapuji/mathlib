@@ -1,9 +1,12 @@
-use std::{collections::HashMap, fmt::Debug};
 use num_complex::Complex64;
+use std::{collections::HashMap, fmt::Debug};
 
-use crate::{expr::{EvalResult, EvalError}, var::Var};
+use crate::{
+    expr::{EvalError, EvalResult},
+    var::Var,
+};
 
-pub trait FuncDef : Debug {
+pub trait FuncDef: Debug {
     fn eval(&self, args: Vec<Complex64>, global_vars: &HashMap<&Var, Complex64>) -> EvalResult;
     fn is_variant_on_global(&self, global_vars: &Var) -> bool;
 }
@@ -25,15 +28,17 @@ pub enum Function {
     Tanh,
     Arcsinh,
     Arccosh,
-    Arctanh
+    Arctanh,
 }
 
 impl FuncDef for Function {
     fn eval(&self, args: Vec<Complex64>, _global_vars: &HashMap<&Var, Complex64>) -> EvalResult {
-        if args.len() != match self {
-            _ => 1
-        } {
-            return Err(EvalError::FnArgCountMismatch { });
+        if args.len()
+            != match self {
+                _ => 1,
+            }
+        {
+            return Err(EvalError::FnArgCountMismatch {});
         }
         Ok(match self {
             Function::Abs => Complex64::from(args[0].norm()),
@@ -51,7 +56,7 @@ impl FuncDef for Function {
             Function::Tanh => args[0].tanh(),
             Function::Arcsinh => args[0].asinh(),
             Function::Arccosh => args[0].acosh(),
-            Function::Arctanh => args[0].atanh()
+            Function::Arctanh => args[0].atanh(),
         })
     }
 

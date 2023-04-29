@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use mathlib::expr::Expr;
-use mathlib::var::Var;
 use mathlib::num::Num;
+use mathlib::var::Var;
 use num_complex::Complex64;
 
 fn main() {
@@ -19,11 +19,16 @@ fn main() {
     let f = x.clone() + two.clone() + x.clone() * y.clone() * (two.clone() + e.clone());
 
     // 0*x + 1*y + 0
-    let g = x.clone() * Expr::Const(Num::Zero) + y.clone() * Expr::Const(Num::One) + Expr::Const(Num::Zero);
+    let g = x.clone() * Expr::Const(Num::Zero)
+        + y.clone() * Expr::Const(Num::One)
+        + Expr::Const(Num::Zero);
 
     // x*i + e + x*x*e + y
-    let z = x.clone() * Expr::Const(Num::I).clone() + e.clone() + x.clone() * x.clone() * Expr::Const(Num::E) + y.clone();
-    let dz_dx = z.simplify_trivial().derivative(x_var.as_ref());//.simplify_trivial();
+    let z = x.clone() * Expr::Const(Num::I).clone()
+        + e.clone()
+        + x.clone() * x.clone() * Expr::Const(Num::E)
+        + y.clone();
+    let dz_dx = z.simplify_trivial().derivative(x_var.as_ref()); //.simplify_trivial();
 
     // let x = Var::new("x");
     // let f = Function::new(
@@ -37,12 +42,17 @@ fn main() {
     v.insert(y_var.as_ref(), Complex64::new(-1.0, 0.0));
 
     println!();
-    println!("{x} = {}\n{y} = {}", v.get(x_var.as_ref()).unwrap(), v.get(y_var.as_ref()).unwrap());
+    println!("{x} = {}", v.get(x_var.as_ref()).unwrap());
+    println!("{y} = {}", v.get(y_var.as_ref()).unwrap());
     println!();
     println!("f = {} = {}", f.simplify_trivial(), f.eval(&v).unwrap());
     println!("k = {} = {}", g, g.simplify_trivial());
     println!("z = {}, dz/dx = {}", z, dz_dx);
-    println!("g = {}, dg/dx = {}", g.simplify_trivial(), g.derivative(x_var.as_ref()));
+    println!(
+        "g = {}, dg/dx = {}",
+        g.simplify_trivial(),
+        g.derivative(x_var.as_ref())
+    );
     println!();
     println!("undefined: {}", Expr::Const(Num::rational(1, 0)));
     println!("infinity: {}", inf);

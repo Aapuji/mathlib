@@ -1,5 +1,4 @@
-use std::{sync::Arc, fmt::Display};
-
+use std::{fmt::Display, sync::Arc};
 
 /** Independent variable, unknown  */
 #[derive(PartialEq, Eq, Hash, Debug)]
@@ -18,7 +17,7 @@ impl Var {
     }
     pub fn get_name(&self) -> String {
         self.name.clone()
-    } 
+    }
 }
 
 impl Display for Var {
