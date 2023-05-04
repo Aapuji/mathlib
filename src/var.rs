@@ -1,4 +1,6 @@
-use std::{fmt::Display, sync::Arc};
+use std::fmt::Display;
+use std::sync::Arc;
+use std::collections::HashMap;
 
 /** Independent variable, unknown  */
 #[derive(PartialEq, Eq, Hash, Debug)]
@@ -25,6 +27,8 @@ impl Display for Var {
         write!(f, "VAR[{}]", self.name)
     }
 }
+
+pub type VarMap<'t, T> = HashMap<&'t Var, T>; 
 
 #[cfg(test)]
 mod test {

@@ -4,5 +4,4 @@ pub mod num;
 pub mod var;
 
 mod algo;
-
 mod testing;

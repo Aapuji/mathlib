@@ -330,6 +330,17 @@ impl Add for Expr {
     }
 }
 
+impl Add<Vec<Expr>> for Expr {
+    type Output = Expr;
+
+    fn add(self, rhs: Vec<Expr>) -> Self::Output {
+        let mut args = vec![self];
+        args.extend(rhs.into_iter());
+
+        Expr::Sum(args)
+    }
+}
+
 impl Sub for Expr {
     type Output = Expr;
 
@@ -341,10 +352,36 @@ impl Sub for Expr {
     }
 }
 
+impl Sub<Vec<Expr>> for Expr {
+    type Output = Expr;
+
+    fn sub(self, rhs: Vec<Expr>) -> Self::Output {
+        Self::Sum(vec![
+            self,
+            Self::Product(vec![
+                Self::Const(Num::from(-1)),
+                Self::Sum(rhs)
+            ])
+        ])
+    }
+}
+
 impl Mul for Expr {
     type Output = Expr;
+
     fn mul(self, rhs: Self) -> Self::Output {
         Self::Product(vec![self, rhs])
+    }
+}
+
+impl Mul<Vec<Expr>> for Expr {
+    type Output = Expr;
+
+    fn mul(self, rhs: Vec<Expr>) -> Self::Output {
+        let mut args = vec![self];
+        args.extend(rhs.into_iter());
+
+        Expr::Product(args)
     }
 }
 

@@ -1,16 +1,18 @@
-use num_complex::Complex64;
-use std::{collections::HashMap, fmt::Debug};
+use num_complex::{Complex64};
+use std::collections::HashMap;
+use std::fmt::Debug;
 
-use crate::expr::{EvalError, EvalResult};
-use crate::var::Var;
+use crate::expr::{EvalError, EvalResult, Expr};
+use crate::var::{Var, VarMap};
 
-pub trait FuncDef: Debug {
-    fn eval(&self, args: Vec<Complex64>, global_vars: &HashMap<&Var, Complex64>) -> EvalResult;
+pub trait FuncDef<T = Complex64> : Debug {
+    fn eval(&self, args: Vec<T>, global_vars: &VarMap<Complex64>) -> EvalResult;
     fn is_variant_on_global(&self, global_vars: &Var) -> bool;
 }
 
 #[derive(Debug)]
 pub enum Function {
+    F(String, Expr, Vec<Var>),
     Abs,
     Sgn,
     Exp,
@@ -29,8 +31,8 @@ pub enum Function {
     Arctanh,
 }
 
-impl FuncDef for Function {
-    fn eval(&self, args: Vec<Complex64>, _global_vars: &HashMap<&Var, Complex64>) -> EvalResult {
+impl FuncDef<Complex64> for Function {
+    fn eval(&self, args: Vec<Complex64>, _global_vars: &VarMap<Complex64>) -> EvalResult {
         if args.len()
             != match self {
                 _ => 1,
@@ -40,6 +42,15 @@ impl FuncDef for Function {
         }
         
         Ok(match self {
+            Function::F(name, body, vars) => {
+                let mut map: VarMap<Complex64> = HashMap::new();
+            
+                for (i, item) in vars.into_iter().enumerate() {
+                    map.insert(item, args[i]);
+                }
+
+                body.eval(&map)?
+            },
             Function::Abs => Complex64::from(args[0].norm()),
             Function::Sgn => args[0] / args[0].norm(),
             Function::Exp => args[0].exp(),
