@@ -12,11 +12,13 @@ impl Var {
     pub fn new(name: &str) -> Arc<Self> {
         Arc::new(Self::new_owned(name))
     }
+
     pub fn new_owned(name: &str) -> Self {
         Self {
             name: name.to_string(),
         }
     }
+
     pub fn get_name(&self) -> String {
         self.name.clone()
     }

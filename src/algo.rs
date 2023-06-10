@@ -1,11 +1,14 @@
 use std::mem::swap;
 
+/// Returns the Greatest Common Denominator (or greatest common factor) of it's two arguments.
 pub fn euclid_gcd(x: u32, y: u32) -> u32 {
     let mut a = x;
     let mut b = y;
+
     if b == 0 {
         return a;
     }
+
     while a != 0 {
         if a >= b {
             a %= b;
@@ -13,6 +16,7 @@ pub fn euclid_gcd(x: u32, y: u32) -> u32 {
             swap(&mut a, &mut b);
         }
     }
+
     return b;
 }
 

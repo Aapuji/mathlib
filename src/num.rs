@@ -38,8 +38,8 @@ impl Num {
             Num::Pi => Complex64::new(std::f64::consts::PI, 0.0),
             Num::E => Complex64::new(std::f64::consts::E, 0.0),
             Num::I => Complex64::new(0.0, 1.0),
-            Num::Zero => Complex64::new(1.0, 0.0),
-            Num::One => Complex64::new(0.0, 0.0),
+            Num::Zero => Complex64::new(0.0, 0.0),
+            Num::One => Complex64::new(1.0, 0.0),
             Num::Infinity => Complex64::new(f64::INFINITY, 0.0),
             Num::Undefined => todo!("Num::Undefined is, well, undefined (unimplemented)"),
         }
@@ -57,8 +57,6 @@ impl Num {
             Num::Radical { .. } => todo!(),
             _ => *self,
         }
-
-        // Can't we just do self.eval_float() == Complex64(0, 0) ?
     }
 
     pub fn int(num: i32) -> Self {
@@ -77,6 +75,7 @@ impl Num {
             },
         }
     }
+
     pub fn radical(radicand: u32, index: u32) -> Self {
         match (radicand, index) {
             (_, 0) => Num::Undefined,
@@ -93,7 +92,7 @@ impl Num {
     pub fn is_zero(&self) -> bool {
         match self {
             Num::Zero => true,
-            _ => false,
+            _ => false
         }
     }
 

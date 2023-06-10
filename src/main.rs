@@ -6,6 +6,41 @@ use mathlib::var::Var;
 use num_complex::Complex64;
 
 fn main() {
+    test_2();
+}
+
+fn test_2() {
+    let x_var = Var::new("x");
+    let y_var = Var::new("y");
+
+    let x = Expr::Var(x_var.clone());
+    let y = Expr::Var(y_var.clone());
+
+    let f = x.clone() * Expr::Const(Num::rational(5, 1)) + x.clone() - y.clone() * Expr::Const(Num::rational(2, 1));
+
+    println!("f = {},\nf simp = {},\ndf/dx = {},\ndf/dx simp = {}", 
+        &f, 
+        f.simplify_trivial_single_layer(), 
+        f.derivative(x_var.as_ref()),
+        f.derivative(x_var.as_ref()).simplify_trivial_single_layer()
+    );
+
+    println!("---");
+
+    let g = y.clone() * Expr::Const(Num::One);
+        // + Expr::Const(Num::int(5))
+        // * y.clone();
+
+    println!("g = {},\ng simp = {},\ndg/dy = {},\ndg/dy simp = {}", 
+        &g, 
+        g.simplify_trivial_single_layer(), 
+        g.derivative(y_var.as_ref()),
+        g.derivative(y_var.as_ref()).simplify_trivial_single_layer()
+    );
+
+}
+
+fn test_1() {
     let x_var = Var::new("x");
     let y_var = Var::new("y");
 
@@ -21,21 +56,17 @@ fn main() {
     // 0*x + 1*y + 0
     let g = x.clone() * Expr::Const(Num::Zero)
         + y.clone() * Expr::Const(Num::One)
+        + y.clone() * y.clone()
         + Expr::Const(Num::Zero);
+        // + Expr::Const(Num::int(5))
+        // * y.clone();
 
     // x*i + e + x*x*e + y
-    let z = x.clone() * Expr::Const(Num::I).clone()
+    let z = x.clone() * Expr::Const(Num::I)
         + e.clone()
         + x.clone() * x.clone() * Expr::Const(Num::E)
         + y.clone();
     let dz_dx = z.simplify_trivial().derivative(x_var.as_ref()); //.simplify_trivial();
-
-    // let x = Var::new("x");
-    // let f = Function::new(
-    //     String::from("f"),
-    //     vec![x.clone()],
-    //     AddExpr::new(vec![Arc::new(1), Arc::new(2)])
-    // );
 
     let mut ctx = HashMap::new();
     ctx.insert(x_var.as_ref(), Complex64::new(1.0, 2.0));
@@ -49,9 +80,10 @@ fn main() {
     println!("k = {} = {}", g, g.simplify_trivial());
     println!("z = {}, dz/dx = {}", z, dz_dx);
     println!(
-        "g = {}, dg/dx = {}",
-        g.simplify_trivial(),
-        g.derivative(x_var.as_ref())
+        "g = {}, dg/dx = {}, dg/dy = {}",
+        g,
+        g.derivative(x_var.as_ref()),
+        g.derivative(y_var.as_ref())
     );
     println!();
     println!("undefined: {}", Expr::Const(Num::rational(1, 0)));
